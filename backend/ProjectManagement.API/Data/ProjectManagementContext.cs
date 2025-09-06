@@ -46,7 +46,7 @@ public partial class ProjectManagementContext : DbContext
 
          modelBuilder.Entity<AssignmentInfo>(entity =>
         {
-            entity.HasNoKey(); // Esto es crucial porque es un resultado de SP, no una tabla
+            entity.HasNoKey();
         });
 
         OnModelCreatingPartial(modelBuilder);
