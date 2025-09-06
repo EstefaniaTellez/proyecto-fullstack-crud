@@ -46,7 +46,6 @@ namespace ProjectManagement.API.Repositories
             var entity = await _dbSet.FindAsync(id);
             if (entity == null) return false;
 
-            // Soft Delete: Buscar propiedad IsDeleted o IsActive via reflexión
             var isDeletedProperty = entity.GetType().GetProperty("IsDeleted");
             var isActiveProperty = entity.GetType().GetProperty("IsActive");
 
@@ -62,7 +61,6 @@ namespace ProjectManagement.API.Repositories
             }
             else
             {
-                // Fallback a eliminación física si no tiene propiedades de soft delete
                 _dbSet.Remove(entity);
             }
 
@@ -98,16 +96,13 @@ namespace ProjectManagement.API.Repositories
             return await ApplySoftDeleteFilter(_dbSet).Where(predicate).ToListAsync();
         }
 
-        // Método para aplicar filtro de soft delete automáticamente
         private IQueryable<T> ApplySoftDeleteFilter(IQueryable<T> query)
         {
             var entityType = typeof(T);
             
-            // Primero verificar si tiene IsDeleted
             var isDeletedProperty = entityType.GetProperty("IsDeleted");
             if (isDeletedProperty != null && isDeletedProperty.PropertyType == typeof(bool))
             {
-                // Crear expresión lambda: x => x.IsDeleted == false
                 var parameter = Expression.Parameter(entityType, "x");
                 var property = Expression.Property(parameter, isDeletedProperty);
                 var constant = Expression.Constant(false);
@@ -117,11 +112,9 @@ namespace ProjectManagement.API.Repositories
                 return query.Where(lambda);
             }
 
-            // Si no tiene IsDeleted, verificar si tiene IsActive
             var isActiveProperty = entityType.GetProperty("IsActive");
             if (isActiveProperty != null && isActiveProperty.PropertyType == typeof(bool))
             {
-                // Crear expresión lambda: x => x.IsActive == true
                 var parameter = Expression.Parameter(entityType, "x");
                 var property = Expression.Property(parameter, isActiveProperty);
                 var constant = Expression.Constant(true);
@@ -131,46 +124,38 @@ namespace ProjectManagement.API.Repositories
                 return query.Where(lambda);
             }
 
-            // Si no tiene ninguna propiedad de soft delete, devolver todos
             return query;
         }
 
-        // Método para verificar si una entidad está eliminada
         private bool IsEntityDeleted(T entity)
         {
             var entityType = entity.GetType();
             
-            // Verificar IsDeleted
             var isDeletedProperty = entityType.GetProperty("IsDeleted");
             if (isDeletedProperty != null && isDeletedProperty.PropertyType == typeof(bool))
             {
                 return (bool)isDeletedProperty.GetValue(entity);
             }
 
-            // Verificar IsActive (invertido)
             var isActiveProperty = entityType.GetProperty("IsActive");
             if (isActiveProperty != null && isActiveProperty.PropertyType == typeof(bool))
             {
                 return !(bool)isActiveProperty.GetValue(entity);
             }
 
-            // Si no tiene propiedades de soft delete, no está eliminada
             return false;
         }
 
-        // Método adicional para obtener todos los registros (incluyendo eliminados)
         public async Task<IEnumerable<T>> GetAllIncludingDeletedAsync()
         {
             return await _dbSet.ToListAsync();
         }
 
-        // Método adicional para buscar incluyendo eliminados
         public async Task<IEnumerable<T>> FindIncludingDeletedAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
-        // Método para obtener entidad incluyendo eliminados
         public async Task<T?> GetByIdIncludingDeletedAsync(int id)
         {
             return await _dbSet.FindAsync(id);
