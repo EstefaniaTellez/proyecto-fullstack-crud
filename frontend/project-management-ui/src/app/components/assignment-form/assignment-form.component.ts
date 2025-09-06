@@ -325,17 +325,15 @@ export class AssignmentFormComponent {
   loadData(projectId: number) {
     this.loading.set(true);
     
-    // Cargar proyecto
+   
     this.apiService.getProject(projectId).subscribe({
       next: (project) => {
         this.project.set(project);
         
-        // Cargar desarrolladores
         this.apiService.getDevelopers().subscribe({
           next: (developers) => {
             this.developers.set(developers);
             
-            // Cargar asignaciones
             this.apiService.getProjectAssignments(projectId).subscribe({
               next: (assignments) => {
                 console.log('📋 Assignments recibidos:', assignments);
@@ -365,7 +363,6 @@ export class AssignmentFormComponent {
     });
   }
 
-  // Obtener desarrolladores disponibles (no asignados)
   availableDevelopers() {
     const assignedDeveloperIds = this.assignments().map(a => a.developerId);
     return this.developers().filter(dev => 
@@ -373,7 +370,6 @@ export class AssignmentFormComponent {
     );
   }
 
-  // Método para validar el formulario (AÑADIDO)
   isFormValid(): boolean {
     return !!this.selectedDeveloperId && 
            !!this.newAssignment.role && 
@@ -403,10 +399,8 @@ export class AssignmentFormComponent {
 
     console.log('📤 Enviando asignación:', assignment);
 
-    // LLAMADA REAL AL API
     this.apiService.createAssignment(assignment).subscribe({
       next: () => {
-        // Resetear formulario
         this.selectedDeveloperId = 0;
         this.newAssignment = { 
           role: '', 
@@ -414,12 +408,10 @@ export class AssignmentFormComponent {
           assignmentDate: new Date().toISOString().split('T')[0] 
         };
         
-        // Recargar asignaciones
         if (this.project()?.projectId) {
           this.loadAssignments(this.project()!.projectId);
         }
         
-        // Forzar detección de cambios
         this.cdRef.detectChanges();
       },
       error: (error) => {
@@ -432,7 +424,6 @@ export class AssignmentFormComponent {
   removeAssignment(assignment: any) {
   console.log('🔍 Assignment completo recibido:', assignment);
   
-  // Extraer developerId de snake_case o camelCase
   const developerId = assignment.developerId || assignment.developer_id;
   
   console.log('🔍 developerId extraído:', developerId);
@@ -454,7 +445,6 @@ export class AssignmentFormComponent {
           console.log('✅ Eliminación exitosa:', response);
           this.notificationService.show('success', 'Asignación removida', 'Desarrollador removido del proyecto');
           
-          // Recargar asignaciones después de un breve delay
           setTimeout(() => {
             this.loadAssignments(projectId);
           });
@@ -474,7 +464,6 @@ loadAssignments(projectId: number) {
     next: (assignments) => {
       console.log('📋 Datos crudos del backend:', assignments);
       
-      // Normalizar los datos de snake_case a camelCase
       const normalizedAssignments = assignments.map((assignment: any) => {
         return {
           developerId: assignment.developer_id || assignment.developerId,
