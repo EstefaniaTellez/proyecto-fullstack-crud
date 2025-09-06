@@ -1,0 +1,12 @@
+/* Estilos globales básicos */
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+}
+
+/* Utilidades de spacing */
+.p-4 { padding: 1.5rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mb-4 { margin-bottom: 1.5rem; }

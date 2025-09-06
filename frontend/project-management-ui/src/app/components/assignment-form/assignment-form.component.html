@@ -1,0 +1,120 @@
+<div class="container">
+      <div class="card">
+        
+        <!-- Header con botón de volver -->
+        <div class="header">
+          <button (click)="goBack()" class="back-button">←</button>
+          <h2 class="title">👥 Asignar Desarrolladores al Proyecto</h2>
+        </div>
+
+        @if (loading()) {
+          <div class="loading-state">
+            <div class="loading-icon">⏳</div>
+            <p class="loading-text">Cargando...</p>
+          </div>
+        } @else {
+          <!-- Información del Proyecto -->
+          <div class="project-info">
+            <h3 class="project-name">{{ project()?.name }}</h3>
+            <div class="project-details">
+              <p><strong>Cliente:</strong> {{ project()?.client }}</p>
+              <p><strong>Estado:</strong> {{ getStatusLabel(project()?.status || '') }}</p>
+              <p><strong>Fecha inicio:</strong> {{ project()?.startDate | date:'dd/MM/yyyy' }}</p>
+              @if (project()?.endDate) {
+                <p><strong>Fecha fin:</strong> {{ project()?.endDate | date:'dd/MM/yyyy' }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Formulario de Asignación -->
+          <div class="assignment-form">
+            <h3 class="section-title">➕ Nueva Asignación</h3>
+            
+            <div class="form-grid">
+              <!-- Desarrollador -->
+              <div class="form-group">
+                <label class="form-label">Desarrollador</label>
+                <select [(ngModel)]="selectedDeveloperId" class="form-select">
+                  <option [value]="0">Seleccionar desarrollador</option>
+                  @for (dev of availableDevelopers(); track dev.developerId) {
+                    <option [value]="dev.developerId">
+                      {{ dev.fullName }} ({{ getSeniorityLabel(dev.seniority) }})
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <!-- Rol -->
+              <div class="form-group">
+                <label class="form-label">Rol</label>
+                <input [(ngModel)]="newAssignment.role" 
+                       placeholder="Ej: Frontend, Backend, QA..."
+                       class="form-input">
+              </div>
+
+              <!-- Horas/Semana -->
+              <div class="form-group">
+                <label class="form-label">Horas/Semana</label>
+                <input type="number" [(ngModel)]="newAssignment.weeklyHours" 
+                       min="1" max="40" 
+                       class="form-input">
+              </div>
+
+              <!-- Fecha de Asignación -->
+              <div class="form-group">
+                <label class="form-label">Fecha de Asignación</label>
+                <input type="date" [(ngModel)]="newAssignment.assignmentDate" 
+                       class="form-input">
+              </div>
+
+              <!-- Botón Asignar -->
+              <div class="form-group">
+                <label class="form-label invisible">Asignar</label>
+                <button (click)="assignDeveloper()" 
+                        [disabled]="!isFormValid()"
+                        class="assign-button">
+                  📌 Asignar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de Asignaciones Existentes -->
+          <div class="assignments-list">
+            <h3 class="section-title">🧑‍💻 Desarrolladores Asignados</h3>
+            
+            @if (assignments().length === 0) {
+              <div class="empty-state">
+                <p>No hay desarrolladores asignados a este proyecto</p>
+              </div>
+            } @else {
+              <div class="assignments-grid">
+                @for (assignment of assignments(); track assignment.developerId + '-' + assignment.assignmentDate + '-' + assignment.role) {
+                  <div class="assignment-card">
+                    <div class="assignment-info">
+                      <div class="developer-header">
+                        <strong>{{ getFullName(assignment) }}</strong>
+                        <span class="seniority-badge {{ assignment.seniority.toLowerCase() }}">
+                          {{ getSeniorityLabel(assignment.seniority) }}
+                        </span>
+                      </div>
+                      <div class="assignment-details">
+                        <p class="email">{{ assignment.email }}</p>
+                        <p class="role"><strong>Rol:</strong> {{ assignment.role }}</p>
+                        <p class="hours"><strong>Horas:</strong> {{ getWeeklyHours(assignment) }} hrs/semana</p>
+                        <p class="date"><strong>Desde:</strong> {{ getAssignmentDate(assignment) | date:'dd/MM/yyyy' }}</p>
+                      </div>
+                    </div>
+                    
+                    <button (click)="removeAssignment(assignment)"
+                            class="remove-button">
+                      🗑️ Remover
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
