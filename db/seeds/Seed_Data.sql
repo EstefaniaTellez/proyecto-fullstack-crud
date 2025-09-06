@@ -16,7 +16,6 @@ INSERT INTO developers (full_name, email, seniority, is_active) VALUES
 GO
 
 -- Insertar datos de ejemplo en 'assignments'
--- NOTA: Los project_id y developer_id dependerán de los valores generados automáticamente (IDENTITY). Ajusta los números (1,2,3) si es necesario.
 INSERT INTO assignments (project_id, developer_id, role, weekly_hours, assignment_date, is_deleted) VALUES
 (1, 1, 'Tech Lead', 35, '2024-01-10', 0),
 (1, 2, 'Backend Developer', 40, '2024-01-12', 0),
